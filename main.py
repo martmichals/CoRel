@@ -290,6 +290,7 @@ if __name__ == "__main__":
 
 
     topic_entities = get_threshold_from_dict(topic_entities_count, 1/3)
+    topic_entities = [x for x in topic_entities if x in word_cap]
     cap_list = [word_cap[x] for x in topic_hier['ROOT']]
     print([(x, word_cap[x]) for x in topic_entities if x in word_cap])
     topic_entities = get_cap_from_topics(topic_entities, word_cap, cap_list)
@@ -363,8 +364,7 @@ if __name__ == "__main__":
     for j,topic in enumerate(topic_hier1['ROOT']):   
         X = []
         for ent in child_entities1[topic]:
-            if ent not in word_emb:
-                continue
+            if topic not in child_entities1 or ent not in word_emb: continue
             X.append(word_emb[ent])
         if len(X) == 0:
             continue

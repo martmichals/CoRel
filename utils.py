@@ -96,8 +96,12 @@ def get_cap(vec_file, cap0_file=None):
 def topic_sim(query, idx2word, t_emb, w_emb):
     if query in t_emb:
         q_vec = t_emb[query]
-    else:
+    elif query in w_emb:
         q_vec = w_emb[query]
+    elif query.lower() in w_emb:
+        q_vec = w_emb[query.lower()]
+    else:
+        return []
     word_emb = np.zeros((len(idx2word), 100))
     for i in range(len(idx2word)):
         word_emb[i] = w_emb[idx2word[i]]
