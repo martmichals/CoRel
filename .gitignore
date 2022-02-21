@@ -1,3 +1,6 @@
+# Pycache
+__pycache__/
+
 # Ignore changes in the data directories
 dblp/
 yelp
