@@ -20,29 +20,31 @@ from train import *
 from batch_generation import *
 from pytorch_transformers import *
 from pytorch_transformers.modeling_bert import *
+from plm_root_generation import *
 
+# Constants
 BATCH_SIZE=16
 TEST_BATCH_SIZE=512
 EPOCHS = 5
 max_seq_length = 128
 
 if __name__ == "__main__":
-
+    # define script arguments
     parser = argparse.ArgumentParser(description='main',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--dataset', default='dblp')
     parser.add_argument('--topic_file', default='topics_field.txt')
     parser.add_argument('--out_file', default='keyword_taxonomy.txt')
-    parser.add_argument('--gpu', default='0')
+    parser.add_argument('--gpu', default=4)
 
-
+    # parse arguments
     args = parser.parse_args()
     print(args)
+
+    # set model-wide variables, select GPU to run on 
+    os.environ["CUDA_VISIBLE_DEVICES"] = "%s" % args.gpu
     dataset = args.dataset
     topic_file = args.topic_file
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
-
-
 
     # ent_sent_index.txt: record the sentence id where each entity occurs; used for generating BERT training sample
     print('------------------loading corpus!------------------')
@@ -59,24 +61,23 @@ if __name__ == "__main__":
     with open(dataset+'/sentences_.txt') as f:
         for i,line in enumerate(f):
             sentences[i] = line
-            
+
+    # ent_ent_index: entities which co-occur in sentences 
     ent_ent_index = dict()
     with open(dataset+'/ent_ent_index.txt') as f:
         for line in f:
             ent = line.split('\t')[0]
             tmp = line.strip().split('\t')[1].split(' ')
             ent_ent_index[ent] = set(tmp)
-            
-    
     
     print('------------------loading embedding!------------------')
-
+    # embedding settings
     pretrain = 0
     use_cap0 = False
     file = topic_file.split('_')[1].split('.')[0]
 
     # load word embedding
-    word_emb, vocabulary, vocabulary_inv, emb_mat = get_emb(vec_file=os.path.join(dataset, 'emb_part_'+file + '_w.txt'))
+    word_emb, vocabulary, vocabulary_inv, emb_mat = get_emb(vec_file=os.path.join(dataset, 'emb_part_'+file+ '_w.txt'))
 
     # load topic embedding
     topic_emb, topic2id, id2topic, topic_hier = get_temb(vec_file=os.path.join(dataset, 'emb_part_'+file+'_t.txt'), topic_file=os.path.join(dataset, topic_file))
@@ -192,6 +193,8 @@ if __name__ == "__main__":
     for j,topic in enumerate(topic_hier['ROOT']): 
         
         X = []
+        if topic not in child_entities:
+            continue
         for ent in child_entities[topic]:
             if ent not in word_emb:
                 continue
@@ -227,26 +230,15 @@ if __name__ == "__main__":
 
     print('------------------Root Node Candidate Generation!------------------')
     parent_cand = get_common_ent_for_list(topic_hier['ROOT'],ent_ent_index)
-    if len(parent_cand) > 1000:
-        parent_cand = type_consistent_for_list(parent_cand, rep_words, ename2embed_bert, False)
 
-    parent_entity_ratio_alltopics = {}
-    parent_entity_count_alltopics = {}
-    for test_topic in topic_hier['ROOT']:
-        print(f'test topic: {test_topic}')
-        
-        test_data = process_test_data(sentences, [test_topic], list(parent_cand), max_seq_length,ent_sent_index, ename2embed_bert, tokenizer)
-        print(f"test data point number: {len(test_data)}")
-        
-        # if len(test_data) > 10000:
-        #     test_data = sample(test_data, 10000)       
-        entity_ratio, entity_count = relation_inference(test_data, model, TEST_BATCH_SIZE,mode='child')
-        parent_entity_ratio_alltopics[test_topic] = entity_ratio
-        parent_entity_count_alltopics[test_topic] = entity_count
+    # PLM root node generation
+    rood_node_inference(
+        topic_hier['ROOT'],
+        list(parent_cand),
+        './prompts.txt',
+        max_spaces=1000
+    )
 
-    parent_entities_count = sum_all_rel(topic_hier['ROOT'], parent_entity_count_alltopics, mode='parent')
-    parent_result = get_threshold_from_dict(parent_entities_count, 1/2)
-    parent_result = type_consistent_for_list(parent_result, rep_words, ename2embed_bert, False)
     print(f'Discover {len(parent_result)} root nodes!')
     print(parent_result)
     
