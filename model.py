@@ -13,9 +13,10 @@ class RelationClassifer(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.hidden_size * 2, self.num_labels)
-        self.apply(self.init_weights)
 
-#       self.init_weights()
+        # Changed: self.apply(self.init_weights) threw an error with current torch version
+        self.apply(self.init_weights)
+        # self.init_weights()
 
 
     def forward(
@@ -37,12 +38,12 @@ class RelationClassifer(BertPreTrainedModel):
             diag_entity1_mask_ = []
             for i in range(batch_size):
                 diag_entity1_mask_.append(torch.diag(entity1_mask[i]).cpu().numpy())
-            diag_entity1_mask = torch.tensor(diag_entity1_mask_).cuda()
+            diag_entity1_mask = torch.tensor(diag_entity1_mask_).cuda() if torch.cuda.is_available() else torch.tensor(diag_entity1_mask_)
 
             diag_entity2_mask_ = []
             for i in range(batch_size):
                 diag_entity2_mask_.append(torch.diag(entity2_mask[i]).cpu().numpy())
-            diag_entity2_mask = torch.tensor(diag_entity2_mask_).cuda()
+            diag_entity2_mask = torch.tensor(diag_entity2_mask_).cuda() if torch.cuda.is_available() else torch.tensor(diag_entity2_mask_)
 
             # Concatenate two entity embedding      
             batch_entity1_emb = torch.matmul(diag_entity1_mask, encoded_layers).permute(0,2,1)

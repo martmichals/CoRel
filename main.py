@@ -21,14 +21,13 @@ from batch_generation import *
 from pytorch_transformers import *
 from pytorch_transformers.modeling_bert import *
 
-# constants
+# Constants
 BATCH_SIZE=16
 TEST_BATCH_SIZE=512
 EPOCHS = 5
 max_seq_length = 128
 
 if __name__ == "__main__":
-
     # define script arguments
     parser = argparse.ArgumentParser(description='main',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -46,10 +45,9 @@ if __name__ == "__main__":
     dataset = args.dataset
     topic_file = args.topic_file
 
-    print('------------------loading corpus!------------------')
-
-    ent_sent_index = dict()
     # ent_sent_index.txt: record the sentence id where each entity occurs; used for generating BERT training sample
+    print('------------------loading corpus!------------------')
+    ent_sent_index = dict()
     with open(dataset+'/ent_sent_index.txt') as f:
         for line in f:
             ent = line.split('\t')[0]
@@ -63,7 +61,7 @@ if __name__ == "__main__":
         for i,line in enumerate(f):
             sentences[i] = line
 
-    # ent_ent_index: entities which co-occur in sentences         
+    # ent_ent_index: entities which co-occur in sentences 
     ent_ent_index = dict()
     with open(dataset+'/ent_ent_index.txt') as f:
         for line in f:
@@ -72,14 +70,13 @@ if __name__ == "__main__":
             ent_ent_index[ent] = set(tmp)
     
     print('------------------loading embedding!------------------')
-
     # embedding settings
     pretrain = 0
     use_cap0 = False
     file = topic_file.split('_')[1].split('.')[0]
 
     # load word embedding
-    word_emb, vocabulary, vocabulary_inv, emb_mat = get_emb(vec_file=os.path.join(dataset, 'emb_part_'+file + '_w.txt'))
+    word_emb, vocabulary, vocabulary_inv, emb_mat = get_emb(vec_file=os.path.join(dataset, 'emb_part_'+file+ '_w.txt'))
 
     # load topic embedding
     topic_emb, topic2id, id2topic, topic_hier = get_temb(vec_file=os.path.join(dataset, 'emb_part_'+file+'_t.txt'), topic_file=os.path.join(dataset, topic_file))
@@ -90,7 +87,6 @@ if __name__ == "__main__":
     ename2embed_bert = loadEnameEmbedding(os.path.join(dataset, 'BERTembed.txt'), 768)
 
     print('------------------generating subtopic candidates!------------------')
-
     # calculate topic representative words: rep_words
     rep_words = {}
     for topic in topic_emb:
@@ -196,6 +192,8 @@ if __name__ == "__main__":
     for j,topic in enumerate(topic_hier['ROOT']): 
         
         X = []
+        if topic not in child_entities:
+            continue
         for ent in child_entities[topic]:
             if ent not in word_emb:
                 continue
@@ -290,7 +288,6 @@ if __name__ == "__main__":
 
 
     topic_entities = get_threshold_from_dict(topic_entities_count, 1/3)
-    topic_entities = [x for x in topic_entities if x in word_cap]
     cap_list = [word_cap[x] for x in topic_hier['ROOT']]
     print([(x, word_cap[x]) for x in topic_entities if x in word_cap])
     topic_entities = get_cap_from_topics(topic_entities, word_cap, cap_list)
@@ -364,7 +361,8 @@ if __name__ == "__main__":
     for j,topic in enumerate(topic_hier1['ROOT']):   
         X = []
         for ent in child_entities1[topic]:
-            if topic not in child_entities1 or ent not in word_emb: continue
+            if ent not in word_emb:
+                continue
             X.append(word_emb[ent])
         if len(X) == 0:
             continue

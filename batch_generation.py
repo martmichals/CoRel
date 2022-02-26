@@ -53,7 +53,6 @@ def process_training_data(sentences, rep_words, topic_hier, max_seq_length, ent_
 #                                 print(' '.join(s))
 #                                 print(a)
 #                                 print(b)
-
                             if len(input_id) > max_seq_length:
                                 if mask_id[1] - mask_id[0] >= max_seq_length:
                                     continue
