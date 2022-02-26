@@ -63,6 +63,9 @@ cd ..
 
 # -- Concept learning bash generation -- 
 
+cd c
+cd ..
+
 # -- Concept learning on the output of the relation transferring step -- 
 
 # -- Post-processing of the final results into a single taxonomy description file -- 
