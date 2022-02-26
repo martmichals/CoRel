@@ -232,7 +232,7 @@ if __name__ == "__main__":
     parent_cand = get_common_ent_for_list(topic_hier['ROOT'],ent_ent_index)
 
     # PLM root node generation
-    rood_node_inference(
+    parent_result = root_node_inference(
         topic_hier['ROOT'],
         list(parent_cand),
         './prompts.txt',
