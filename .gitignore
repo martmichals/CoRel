@@ -6,6 +6,12 @@ dblp/
 yelp
 nyt/
 arxiv/
+exch/
+aistack/
+softwarestack/
 
 # Intermediate text file
 intermediate.txt
+
+# Unzipped Autophrase directory
+AutoPhrase0/

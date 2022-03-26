@@ -1,0 +1,4 @@
+__child__ is a part of __parent__.
+__child__ is a subfield of __parent__.
+__child__ is an area in __parent__.
+__parent__ has the subtopic of __child__.

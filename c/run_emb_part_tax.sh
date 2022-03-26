@@ -20,7 +20,7 @@ echo "    Threads:           ${threads}"
 echo "    Topic File Suffix: ${topic_file}"
 
 # text file name; one document per line
-text_file=phrase_text.txt
+text_file=sentences_.txt
 
 # topic file suffix
 output_file=${topic_file}
