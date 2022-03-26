@@ -66,7 +66,7 @@ def process_training_data(sentences, rep_words, topic_hier, max_seq_length, ent_
                                 c_index = mask_id[0] if c_index<p_index else mask_id[1]
                             
                             input_id = torch.tensor(input_id)
-                            r_sentence = F.pad(torch.tensor(input_id),(0,max_seq_length-len(input_id)), "constant", 0)
+                            r_sentence = F.pad(input_id.clone().detach(),(0,max_seq_length-len(input_id)), "constant", 0)
                             attention_mask = torch.cat((torch.ones_like(input_id), torch.zeros(max_seq_length-len(input_id), dtype=torch.int64)),dim=0)
                             p_mask = np.zeros((max_seq_length))
                             p_mask[p_index] = 1
@@ -126,7 +126,7 @@ def process_training_data(sentences, rep_words, topic_hier, max_seq_length, ent_
                                 c_index = mask_id[0] if c_index<p_index else mask_id[1]
                             
                             input_id = torch.tensor(input_id)
-                            r_sentence = F.pad(torch.tensor(input_id),(0,max_seq_length-len(input_id)), "constant", 0)
+                            r_sentence = F.pad(input_id.clone().detach,(0,max_seq_length-len(input_id)), "constant", 0)
                             attention_mask = torch.cat((torch.ones_like(input_id), torch.zeros(max_seq_length-len(input_id), dtype=torch.int64)),dim=0)
                             p_mask = np.zeros((max_seq_length))
                             p_mask[p_index] = 1
@@ -179,7 +179,7 @@ def process_training_data(sentences, rep_words, topic_hier, max_seq_length, ent_
             c_index = mask_id[0] if c_index<p_index else mask_id[1]
 
         input_id = torch.tensor(input_id)
-        r_sentence = F.pad(torch.tensor(input_id),(0,max_seq_length-len(input_id)), "constant", 0)
+        r_sentence = F.pad(input_id.clone().detach(),(0,max_seq_length-len(input_id)), "constant", 0)
         attention_mask = torch.cat((torch.ones_like(input_id), torch.zeros(max_seq_length-len(input_id), dtype=torch.int64)),dim=0)
 
         p_mask = np.zeros((max_seq_length))
@@ -239,7 +239,7 @@ def process_test_data(sentences, test_topic_rep_words, test_cand, max_seq_length
                         c_index = mask_id[0] if c_index<p_index else mask_id[1]
 
                     input_id = torch.tensor(input_id)
-                    r_sentence = F.pad(torch.tensor(input_id),(0,max_seq_length-len(input_id)), "constant", 0)
+                    r_sentence = F.pad(input_id.clone().detach(),(0,max_seq_length-len(input_id)), "constant", 0)
                     attention_mask = torch.cat((torch.ones_like(input_id), torch.zeros(max_seq_length-len(input_id), dtype=torch.int64)),dim=0)
 
                     p_mask = np.zeros((max_seq_length))
@@ -255,17 +255,17 @@ def process_test_data(sentences, test_topic_rep_words, test_cand, max_seq_length
     return final_data
 
 def generate_batch(batch):
-    input_ids = torch.tensor([np.array(entry[0]) for entry in batch])
-    entity1_mask = torch.tensor([entry[1] for entry in batch])
-    entity2_mask = torch.tensor([entry[2] for entry in batch])
-    attention_mask = torch.tensor([np.array(entry[3]) for entry in batch])
-    labels = torch.tensor([entry[4] for entry in batch])
+    input_ids = torch.tensor(np.array([np.array(entry[0]) for entry in batch]))
+    entity1_mask = torch.tensor(np.array([entry[1] for entry in batch]))
+    entity2_mask = torch.tensor(np.array([entry[2] for entry in batch]))
+    attention_mask = torch.tensor(np.array([np.array(entry[3]) for entry in batch]))
+    labels = torch.tensor(np.array([entry[4] for entry in batch]))
     return input_ids, entity1_mask, entity2_mask, attention_mask, labels 
 
 def generate_test_batch(batch):
-    input_ids = torch.tensor([np.array(entry[0]) for entry in batch])
-    entity1_mask = torch.tensor([entry[1] for entry in batch])
-    entity2_mask = torch.tensor([entry[2] for entry in batch])
-    attention_mask = torch.tensor([np.array(entry[3]) for entry in batch])
+    input_ids = torch.tensor(np.array([np.array(entry[0]) for entry in batch]))
+    entity1_mask = torch.tensor(np.array([entry[1] for entry in batch]))
+    entity2_mask = torch.tensor(np.array([entry[2] for entry in batch]))
+    attention_mask = torch.tensor(np.array([np.array(entry[3]) for entry in batch]))
     entity = [entry[4] for entry in batch]
     return input_ids, entity1_mask, entity2_mask, attention_mask, entity

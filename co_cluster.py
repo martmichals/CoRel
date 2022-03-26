@@ -36,7 +36,7 @@ def type_consistent_cocluster(topic_word_dict0, ename2embed_bert, n_cluster_min,
         
 
     # AP
-    clustering = AffinityPropagation().fit(all_embed)
+    clustering = AffinityPropagation(max_iter=1000, damping=0.9, verbose=True).fit(all_embed)
     n_clusters = max(clustering.labels_) + 1
     clusters = {}
     col_vectors = np.zeros( (len(topic_word_dict) ,n_clusters), dtype=float)

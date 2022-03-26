@@ -1,3 +1,4 @@
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from pytorch_transformers import *
@@ -37,12 +38,12 @@ class RelationClassifer(BertPreTrainedModel):
             diag_entity1_mask_ = []
             for i in range(batch_size):
                 diag_entity1_mask_.append(torch.diag(entity1_mask[i]).cpu().numpy())
-            diag_entity1_mask = torch.tensor(diag_entity1_mask_).cuda()
+            diag_entity1_mask = torch.tensor(np.array(diag_entity1_mask_)).cuda()
 
             diag_entity2_mask_ = []
             for i in range(batch_size):
                 diag_entity2_mask_.append(torch.diag(entity2_mask[i]).cpu().numpy())
-            diag_entity2_mask = torch.tensor(diag_entity2_mask_).cuda()
+            diag_entity2_mask = torch.tensor(np.array(diag_entity2_mask_)).cuda()
 
             # Concatenate two entity embedding      
             batch_entity1_emb = torch.matmul(diag_entity1_mask, encoded_layers).permute(0,2,1)

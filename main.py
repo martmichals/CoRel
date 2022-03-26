@@ -35,6 +35,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset', default='dblp')
     parser.add_argument('--topic_file', default='topics_field.txt')
     parser.add_argument('--out_file', default='keyword_taxonomy.txt')
+    parser.add_argument('--prompt_file', default='prompts_dblp.txt')
     parser.add_argument('--gpu', default=4)
 
     # parse arguments
@@ -194,14 +195,17 @@ if __name__ == "__main__":
         
         X = []
         if topic not in child_entities:
+            print(f'\tWarning: {topic} not in child_entities. Continuing.')
             continue
         for ent in child_entities[topic]:
             if ent not in word_emb:
+                print(f'\tWarning: {ent} not in word_emb. Continuing.')
                 continue
+            print(f'Appending {ent} embedding to X matrix')
             X.append(word_emb[ent])
         X = np.array(X)
 
-        clustering = AffinityPropagation().fit(X)
+        clustering = AffinityPropagation(max_iter=1000, damping=0.9, verbose=True).fit(X)
         n_clusters = max(clustering.labels_) + 1
         clusters = {}
         for i in range(n_clusters):
@@ -235,8 +239,8 @@ if __name__ == "__main__":
     parent_result = root_node_inference(
         topic_hier['ROOT'],
         list(parent_cand),
-        './prompts.txt',
-        max_spaces=1000
+        args.prompt_file,
+        max_spaces=20
     )
 
     print(f'Discover {len(parent_result)} root nodes!')
